@@ -41,10 +41,10 @@
     "networkSecurityGroupName": "nsg",
     "vmStorageAccountContainerName": "vhds",
     "virtualNetworkName": "vnet",
-    "sub1": "e2ee6274-c6e3-4df1-b3d2-79107c10f7b0",
-    "sub2": "4fd9d8ba-07eb-439f-899e-36324ada2fce",
-    "sub3": "0dfa1615-34c5-4943-bce9-126083351e54",
-    "condition1": "[if(equals(variables('AzureSubscriptionID'), variables('sub2')), variables('imageGallery2'), variables('imageGallery3'))]",
+    "tenant1": "0f69441c-29e3-4293-9c7a-c6b8ec38e66e",
+    "tenant2": "9584ea77-d130-40c4-9106-febe4d6abe9a",
+    "tenant3": "c1f5a5d8-f0d8-40c2-8fc3-7e1526b31981",
+    "condition1": "[if(equals(variables('AzureTenantID'), variables('tenant2')), variables('imageGallery2'), variables('imageGallery3'))]",
     "imageGallery1": "/subscriptions/e2ee6274-c6e3-4df1-b3d2-79107c10f7b0/resourceGroups/cloudlab-mgmt/providers/Microsoft.Compute/galleries/mocImageGallery/images/az-104-120-303-304-500-definition/versions/Latest",
     "imageGallery2": "/subscriptions/4fd9d8ba-07eb-439f-899e-36324ada2fce/resourceGroups/cloudlabs-mgmt/providers/Microsoft.Compute/galleries/mocImageGallery/images/az-104-120-303-304-500-definition/versions/Latest",
     "imageGallery3": "/subscriptions/0dfa1615-34c5-4943-bce9-126083351e54/resourceGroups/cloudlabs-mgmt/providers/Microsoft.Compute/galleries/mocImageGallery/images/az-104-120-303-304-500-definition/versions/Latest",
@@ -85,7 +85,7 @@
             }
           },
           "imageReference": {
-            "id": "[if(equals(variables('AzureSubscriptionID'), variables('sub2')), variables('imageGallery1'), variables('condition1'))]"
+            "id": "[if(equals(variables('AzureTenantID'), variables('tenant1')), variables('imageGallery1'), variables('condition1'))]"
 
           }
         },
