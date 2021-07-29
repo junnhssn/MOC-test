@@ -20,6 +20,14 @@
     "DeploymentID": {
       "type": "string"
     },
+    "vmImage": {
+      "type": "string",
+      "defaultValue": "yes",
+      "allowedValues": [
+        "yes",
+        "no"
+      ]
+    },
     "InstallCloudLabsShadow": {
       "type": "string",
       "defaultValue": "no",
@@ -41,13 +49,6 @@
     "networkSecurityGroupName": "nsg",
     "vmStorageAccountContainerName": "vhds",
     "virtualNetworkName": "vnet",
-    "tenant1": "0f69441c-29e3-4293-9c7a-c6b8ec38e66e",
-    "tenant2": "9584ea77-d130-40c4-9106-febe4d6abe9a",
-    "tenant3": "c1f5a5d8-f0d8-40c2-8fc3-7e1526b31981",
-    "condition1": "[if(equals(variables('AzureTenantID'), variables('tenant2')), variables('imageGallery2'), variables('imageGallery3'))]",
-    "imageGallery1": "/subscriptions/e2ee6274-c6e3-4df1-b3d2-79107c10f7b0/resourceGroups/cloudlab-mgmt/providers/Microsoft.Compute/galleries/mocImageGallery/images/az-104-120-303-304-500-definition/versions/Latest",
-    "imageGallery2": "/subscriptions/4fd9d8ba-07eb-439f-899e-36324ada2fce/resourceGroups/cloudlabs-mgmt/providers/Microsoft.Compute/galleries/mocImageGallery/images/az-104-120-303-304-500-definition/versions/Latest",
-    "imageGallery3": "/subscriptions/0dfa1615-34c5-4943-bce9-126083351e54/resourceGroups/cloudlabs-mgmt/providers/Microsoft.Compute/galleries/mocImageGallery/images/az-104-120-303-304-500-definition/versions/Latest",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
     "subnetRef": "[concat(variables('vnetID'),'/subnets/','subnet')]"
   },
@@ -66,28 +67,40 @@
       }
     },
     {
+      "condition": "[equals(parameters('vmImage'), 'yes')]",
       "name": "[variables('winvirtualMachineName')]",
       "type": "Microsoft.Compute/virtualMachines",
-      "apiVersion": "2020-12-01",
+      "apiVersion": "2017-03-30",
       "location": "[resourceGroup().location]",
       "dependsOn": [
         "[concat('Microsoft.Network/networkInterfaces/', variables('networkInterfaceName'))]"
       ],
       "properties": {
+        "osProfile": {
+          "computerName": "[variables('winvirtualMachineName')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]",
+          "windowsConfiguration": {
+            "provisionVmAgent": "true"
+          }
+        },
         "hardwareProfile": {
           "vmSize": "Standard_B2s"
         },
         "storageProfile": {
+
+          "imageReference": {
+            "id": "/subscriptions/e2ee6274-c6e3-4df1-b3d2-79107c10f7b0/resourceGroups/cloudlab-mgmt/providers/Microsoft.Compute/galleries/ImageGallery/images/az900-definition/versions/Latest"
+          },
           "osDisk": {
             "createOption": "fromImage",
             "managedDisk": {
               "storageAccountType": "Standard_LRS"
             }
           },
-          "imageReference": {
-            "id": "[if(equals(variables('AzureTenantID'), variables('tenant1')), variables('imageGallery1'), variables('condition1'))]"
+          "dataDisks": [
 
-          }
+          ]
         },
         "networkProfile": {
           "networkInterfaces": [
@@ -95,13 +108,6 @@
               "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
             }
           ]
-        },
-        "securityProfile": {},
-        "licenseType": "Windows_Server",
-        "diagnosticsProfile": {
-          "bootDiagnostics": {
-            "enabled": true
-          }
         }
       },
       "resources": [
@@ -120,9 +126,10 @@
             "autoUpgradeMinorVersion": "true",
             "settings": {
               "fileUris": [
-                "https://raw.githubusercontent.com/junnhssn/MOC-test/main/psscript.ps1"
+                "https://experienceazure.blob.core.windows.net/templates/cloudlabs-common/cloudlabs-windows-functions.ps1",
+                "https://experienceazure.blob.core.windows.net/templates/moc/az-900/scripts/psscript.ps1"
               ],
-              "commandToExecute": "[concat('powershell.exe -ExecutionPolicy Unrestricted -File psscript.ps1')]"
+              "commandToExecute": "[concat('powershell.exe -ExecutionPolicy Unrestricted -File moc/az-900/scripts/psscripts.ps1', variables('cloudlabsCommon'))]"
             }
           }
         }
